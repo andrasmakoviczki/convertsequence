@@ -54,7 +54,7 @@ public class ConvertSequence {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            writer.close();
+            //writer.close();
             //IOUtils.closeStream(writer);
         }
 
