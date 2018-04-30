@@ -36,6 +36,7 @@ public class ConvertSequence {
         conf.set("fs.defaultFS", hdfsPath);
         conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
+        conf.set("yarn.app.mapreduce.am.staging-dir","/tmp");
 
         FileSystem fs = FileSystem.get(URI.create(hdfsPath), conf);
         Path inputPath = new Path(hdfsPath);
