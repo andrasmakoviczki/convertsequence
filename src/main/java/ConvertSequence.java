@@ -7,6 +7,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.URI;
 
 /**
  * Created by AMakoviczki on 2018. 04. 30..
@@ -25,9 +26,11 @@ public class ConvertSequence {
         String hdfsPath = args[0];
 
         Configuration conf = new Configuration();
-        //conf.set("fs.defaultFS", hdfsPath);
+        conf.set("fs.defaultFS", hdfsPath);
+        conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
+        conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
 
-        FileSystem fs = FileSystem.get(conf);
+        FileSystem fs = FileSystem.get(URI.create(hdfsPath),conf);
         Path inputPath = new Path(hdfsPath);
 
         if (!fs.exists(inputPath)) {
