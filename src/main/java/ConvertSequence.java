@@ -30,6 +30,7 @@ public class ConvertSequence {
         }
 
         String hdfsPath = args[0];
+        String seqPath = args[1];
 
         Configuration conf = new Configuration();
         conf.set("fs.defaultFS", hdfsPath);
@@ -38,6 +39,7 @@ public class ConvertSequence {
 
         FileSystem fs = FileSystem.get(URI.create(hdfsPath), conf);
         Path inputPath = new Path(hdfsPath);
+        Path outputPath = new Path(seqPath);
 
         if (!fs.exists(inputPath)) {
             System.out.println("Path " + inputPath + " does not exists");
@@ -57,6 +59,7 @@ public class ConvertSequence {
                 file.read(buffer);
 
                 writer = SequenceFile.createWriter(conf,
+                        SequenceFile.Writer.file(outputPath),
                         SequenceFile.Writer.keyClass(Text.class),
                         SequenceFile.Writer.valueClass(BytesWritable.class));
 
