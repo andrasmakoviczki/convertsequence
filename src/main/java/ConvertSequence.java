@@ -66,6 +66,11 @@ public class ConvertSequence {
 
     public static void write(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, SequenceFile.Writer writer) throws IOException {
         FileStatus[] fileStatuses = fs.listStatus(inputPath);
+        writer = SequenceFile.createWriter(conf,
+                SequenceFile.Writer.file(outputPath),
+                SequenceFile.Writer.keyClass(Text.class),
+                SequenceFile.Writer.valueClass(BytesWritable.class));
+
         for (FileStatus status : fileStatuses) {
             System.out.println(status.getPath().toString());
 
@@ -73,11 +78,6 @@ public class ConvertSequence {
 
             byte buffer[] = new byte[file.available()];
             file.read(buffer);
-
-            writer = SequenceFile.createWriter(conf,
-                    SequenceFile.Writer.file(outputPath),
-                    SequenceFile.Writer.keyClass(Text.class),
-                    SequenceFile.Writer.valueClass(BytesWritable.class));
 
             writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
 
