@@ -36,7 +36,7 @@ public class ConvertSequence {
         conf.set("fs.defaultFS", hdfsPath);
         conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
-        conf.set("yarn.app.mapreduce.am.staging-dir","/tmp");
+        conf.set("yarn.app.mapreduce.am.staging-dir", "/tmp");
 
         FileSystem fs = FileSystem.get(URI.create(hdfsPath), conf);
         Path inputPath = new Path(hdfsPath);
@@ -49,27 +49,54 @@ public class ConvertSequence {
 
         SequenceFile.Writer writer = null;
 
-        FileStatus[] fileStatuses = fs.listStatus(inputPath);
         try {
-            for (FileStatus status : fileStatuses) {
-                System.out.println(status.getPath().toString());
-
-                FSDataInputStream file = fs.open(status.getPath());
-
-                byte buffer[] = new byte[file.available()];
-                file.read(buffer);
-
-                writer = SequenceFile.createWriter(conf,
-                        SequenceFile.Writer.file(outputPath),
-                        SequenceFile.Writer.keyClass(Text.class),
-                        SequenceFile.Writer.valueClass(BytesWritable.class));
-
-                writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
-            }
+            write(conf, fs, inputPath, outputPath, writer);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            IOUtils.closeStream(writer);
+            writer.close();
+            //IOUtils.closeStream(writer);
+        }
+
+        SequenceFile.Reader reader = null;
+
+        try {
+            read(conf,fs,outputPath,reader);
+        } catch (Exception e){
+            e.printStackTrace();
+        } finally {
+            reader.close();
+        }
+    }
+
+    public static void write(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, SequenceFile.Writer writer) throws IOException {
+        FileStatus[] fileStatuses = fs.listStatus(inputPath);
+        for (FileStatus status : fileStatuses) {
+            System.out.println(status.getPath().toString());
+
+            FSDataInputStream file = fs.open(status.getPath());
+
+            byte buffer[] = new byte[file.available()];
+            file.read(buffer);
+
+            writer = SequenceFile.createWriter(conf,
+                    SequenceFile.Writer.file(outputPath),
+                    SequenceFile.Writer.keyClass(Text.class),
+                    SequenceFile.Writer.valueClass(BytesWritable.class));
+
+            writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
+        }
+    }
+
+    public static void read(Configuration conf, FileSystem fs, Path outputPath, SequenceFile.Reader reader) throws IOException{
+        reader = new SequenceFile.Reader(conf,
+                SequenceFile.Reader.file(outputPath));
+
+        Text key = new Text();
+        BytesWritable value = new BytesWritable();
+
+        while (reader.next(key, value)) {
+            System.out.println(key.toString() + " " + value.getLength());
         }
     }
 }
