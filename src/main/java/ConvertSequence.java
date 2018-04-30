@@ -8,6 +8,8 @@ import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.io.SequenceFile;
 import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.compress.CompressionCodec;
+import org.apache.hadoop.io.compress.GzipCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,7 @@ public class ConvertSequence {
         SequenceFile.Writer writer = null;
 
         try {
-            write(conf, fs, inputPath, outputPath, writer);
+            write(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.RECORD,new GzipCodec());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,12 +66,13 @@ public class ConvertSequence {
         }
     }
 
-    public static void write(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, SequenceFile.Writer writer) throws IOException {
+    public static void write(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, SequenceFile.Writer writer, SequenceFile.CompressionType cType, CompressionCodec cCodec) throws IOException {
         FileStatus[] fileStatuses = fs.listStatus(inputPath);
         writer = SequenceFile.createWriter(conf,
                 SequenceFile.Writer.file(outputPath),
                 SequenceFile.Writer.keyClass(Text.class),
-                SequenceFile.Writer.valueClass(BytesWritable.class));
+                SequenceFile.Writer.valueClass(BytesWritable.class),
+                SequenceFile.Writer.compression(cType,cCodec));
 
         for (FileStatus status : fileStatuses) {
             System.out.println(status.getPath().toString());
