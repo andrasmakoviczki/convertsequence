@@ -82,8 +82,8 @@ public class ConvertSequence {
             writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
 
             file.close();
-            IOUtils.closeStream(writer);
         }
+        IOUtils.closeStream(writer);
     }
 
     public static void read(Configuration conf, FileSystem fs, Path outputPath, SequenceFile.Reader reader) throws IOException{
