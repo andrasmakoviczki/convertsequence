@@ -4,10 +4,7 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.IOUtils;
-import org.apache.hadoop.io.SequenceFile;
-import org.apache.hadoop.io.Text;
+import org.apache.hadoop.io.*;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
 import org.slf4j.Logger;
@@ -49,18 +46,33 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        SequenceFile.Writer writer = null;
+        /*SequenceFile.Writer writer = null;
 
         try {
             write(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
         } catch (Exception e) {
             e.printStackTrace();
+        }*/
+
+        MapFile.Writer writer = null;
+        try {
+            writeMap(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
-        SequenceFile.Reader reader = null;
+        /*SequenceFile.Reader reader = null;
 
         try {
             read(conf,fs,outputPath,reader);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
+        MapFile.Reader reader = null;
+
+        try {
+            readMap(conf,fs,outputPath,reader);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -89,9 +101,46 @@ public class ConvertSequence {
         IOUtils.closeStream(writer);
     }
 
+    public static void writeMap(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, MapFile.Writer writer, SequenceFile.CompressionType cType, CompressionCodec cCodec) throws IOException {
+        FileStatus[] fileStatuses = fs.listStatus(inputPath);
+        writer = new MapFile.Writer(conf,
+                outputPath,
+                MapFile.Writer.keyClass(Text.class),
+                MapFile.Writer.valueClass(BytesWritable.class),
+                SequenceFile.Writer.valueClass(BytesWritable.class),
+                SequenceFile.Writer.compression(cType,cCodec));
+
+        for (FileStatus status : fileStatuses) {
+            System.out.println(status.getPath().toString());
+
+            FSDataInputStream file = fs.open(status.getPath());
+
+            byte buffer[] = new byte[file.available()];
+            file.read(buffer);
+
+            writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
+
+            file.close();
+        }
+        IOUtils.closeStream(writer);
+    }
+
     public static void read(Configuration conf, FileSystem fs, Path outputPath, SequenceFile.Reader reader) throws IOException{
         reader = new SequenceFile.Reader(conf,
                 SequenceFile.Reader.file(outputPath));
+
+        Text key = new Text();
+        BytesWritable value = new BytesWritable();
+
+        while (reader.next(key, value)) {
+            System.out.println(key.toString() + " " + value.getLength());
+        }
+
+        IOUtils.closeStream(reader);
+    }
+
+    public static void readMap(Configuration conf, FileSystem fs, Path outputPath, MapFile.Reader reader) throws IOException{
+        reader = new MapFile.Reader(outputPath,conf);
 
         Text key = new Text();
         BytesWritable value = new BytesWritable();
