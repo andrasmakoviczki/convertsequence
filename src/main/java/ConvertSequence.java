@@ -63,7 +63,7 @@ public class ConvertSequence {
                 writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
             }
         } catch (Exception e) {
-            System.out.println("Exception MESSAGES = " + e.getMessage() + " \n" + e.getStackTrace());
+            e.printStackTrace();
         } finally {
             IOUtils.closeStream(writer);
         }
