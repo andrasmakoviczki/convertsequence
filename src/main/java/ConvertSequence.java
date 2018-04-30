@@ -62,10 +62,8 @@ public class ConvertSequence {
 
         try {
             read(conf,fs,outputPath,reader);
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            reader.close();
         }
     }
 
@@ -100,5 +98,7 @@ public class ConvertSequence {
         while (reader.next(key, value)) {
             System.out.println(key.toString() + " " + value.getLength());
         }
+
+        IOUtils.closeStream(reader);
     }
 }
