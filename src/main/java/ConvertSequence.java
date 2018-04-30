@@ -1,12 +1,18 @@
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.io.SequenceFile;
+import org.apache.hadoop.io.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.Writer;
 import java.net.URI;
 
 /**
@@ -30,7 +36,7 @@ public class ConvertSequence {
         conf.set("fs.hdfs.impl", org.apache.hadoop.hdfs.DistributedFileSystem.class.getName());
         conf.set("fs.file.impl", org.apache.hadoop.fs.LocalFileSystem.class.getName());
 
-        FileSystem fs = FileSystem.get(URI.create(hdfsPath),conf);
+        FileSystem fs = FileSystem.get(URI.create(hdfsPath), conf);
         Path inputPath = new Path(hdfsPath);
 
         if (!fs.exists(inputPath)) {
@@ -38,12 +44,28 @@ public class ConvertSequence {
             System.exit(1);
         }
 
+        SequenceFile.Writer writer = null;
+
         FileStatus[] fileStatuses = fs.listStatus(inputPath);
-        for (FileStatus status : fileStatuses
-                ) {
-            System.out.println(status.getPath().toString());
+        try {
+            for (FileStatus status : fileStatuses) {
+                System.out.println(status.getPath().toString());
+
+                FSDataInputStream file = fs.open(status.getPath());
+
+                byte buffer[] = new byte[file.available()];
+                file.read(buffer);
+
+                writer = SequenceFile.createWriter(conf,
+                        SequenceFile.Writer.keyClass(Text.class),
+                        SequenceFile.Writer.valueClass(BytesWritable.class));
+
+                writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
+            }
+        } catch (Exception e) {
+            System.out.println("Exception MESSAGES = " + e.getMessage());
+        } finally {
+            IOUtils.closeStream(writer);
         }
-
-
     }
 }
