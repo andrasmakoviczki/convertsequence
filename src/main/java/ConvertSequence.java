@@ -22,10 +22,10 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        String hdfsPath = "hdfs://" + args[0];
+        String hdfsPath = args[0];
 
         Configuration conf = new Configuration();
-        conf.set("fs.default.name", hdfsPath);
+        //conf.set("fs.defaultFS", hdfsPath);
 
         FileSystem fs = FileSystem.get(conf);
         Path inputPath = new Path(hdfsPath);
