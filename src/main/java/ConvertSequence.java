@@ -52,7 +52,7 @@ public class ConvertSequence {
         SequenceFile.Writer writer = null;
 
         try {
-            write(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.RECORD,new GzipCodec());
+            write(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
         } catch (Exception e) {
             e.printStackTrace();
         }
