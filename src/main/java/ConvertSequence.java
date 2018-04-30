@@ -50,7 +50,7 @@ public class ConvertSequence {
         SequenceFile.Writer writer = null;
 
         try {
-            //write(conf, fs, inputPath, outputPath, writer);
+            write(conf, fs, inputPath, outputPath, writer);
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -85,6 +85,8 @@ public class ConvertSequence {
                     SequenceFile.Writer.valueClass(BytesWritable.class));
 
             writer.append(new Text(status.getPath().toString()), new BytesWritable(buffer));
+
+            file.close();
         }
     }
 
