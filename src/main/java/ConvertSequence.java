@@ -45,20 +45,20 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        /*SequenceFile.Writer writer = null;
+        SequenceFile.Writer writer = null;
 
         try {
             write(conf, fs, inputPath, outputPath, writer, null,null);
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
 
-        MapFile.Writer writer = null;
+        /*MapFile.Writer writer = null;
         try {
             writeMap(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*SequenceFile.Reader reader = null;
 
@@ -82,8 +82,7 @@ public class ConvertSequence {
         writer = SequenceFile.createWriter(conf,
                 SequenceFile.Writer.file(outputPath),
                 SequenceFile.Writer.keyClass(Text.class),
-                SequenceFile.Writer.valueClass(BytesWritable.class),
-                SequenceFile.Writer.compression(cType,cCodec));
+                SequenceFile.Writer.valueClass(BytesWritable.class));
 
         for (FileStatus status : fileStatuses) {
             System.out.println(status.getPath().toString());
