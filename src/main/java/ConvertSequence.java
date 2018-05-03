@@ -60,13 +60,13 @@ public class ConvertSequence {
             e.printStackTrace();
         }*/
 
-        SequenceFile.Reader reader = null;
+        /*SequenceFile.Reader reader = null;
 
         try {
             read(conf,fs,outputPath,reader);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*MapFile.Reader reader = null;
 
