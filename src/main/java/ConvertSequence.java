@@ -11,7 +11,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.Writer;
 import java.net.URI;
 
 /**
@@ -46,36 +45,36 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        /*SequenceFile.Writer writer = null;
+        SequenceFile.Writer writer = null;
 
         try {
-            write(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-
-        MapFile.Writer writer = null;
-        try {
-            writeMap(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
+            write(conf, fs, inputPath, outputPath, writer, null,null);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
-        /*SequenceFile.Reader reader = null;
+        /*MapFile.Writer writer = null;
+        try {
+            writeMap(conf, fs, inputPath, outputPath, writer, SequenceFile.CompressionType.BLOCK,new GzipCodec());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }*/
+
+        SequenceFile.Reader reader = null;
 
         try {
             read(conf,fs,outputPath,reader);
         } catch (Exception e) {
             e.printStackTrace();
-        }*/
+        }
 
-        MapFile.Reader reader = null;
+        /*MapFile.Reader reader = null;
 
         try {
             readMap(conf,fs,outputPath,reader);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 
     public static void write(Configuration conf, FileSystem fs, Path inputPath, Path outputPath, SequenceFile.Writer writer, SequenceFile.CompressionType cType, CompressionCodec cCodec) throws IOException {
