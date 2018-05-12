@@ -5,24 +5,18 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.KeyValue;
-import org.apache.hadoop.hbase.client.HBaseAdmin;
 import org.apache.hadoop.hbase.client.HTable;
 import org.apache.hadoop.hbase.client.Put;
-import org.apache.hadoop.hbase.io.hfile.HFile;
 import org.apache.hadoop.hbase.util.Bytes;
+
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.io.compress.CompressionCodec;
-import org.apache.hadoop.io.compress.GzipCodec;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
-
-import static org.apache.hadoop.hbase.HColumnDescriptor.BLOCKSIZE;
-import static org.apache.hadoop.hbase.HColumnDescriptor.COMPRESSION;
-
 /**
  * Created by AMakoviczki on 2018. 04. 30..
  */
@@ -138,7 +132,7 @@ public class ConvertSequence {
 
         Configuration hconf = HBaseConfiguration.create();
 
-        HTable hTable = new HTable(conf, "images");
+        HTable hTable = new HTable(hconf, "images");
 
         for (FileStatus status : fileStatuses) {
             FSDataInputStream file = fs.open(status.getPath());
