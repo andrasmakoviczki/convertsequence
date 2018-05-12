@@ -144,7 +144,7 @@ public class ConvertSequence {
         if(!admin.tableExists(tableName))
         {
             HTableDescriptor hbaseTable = new HTableDescriptor(tableName);
-            hbaseTable.addFamily(new HColumnDescriptor("icf"));
+            hbaseTable.addFamily(new HColumnDescriptor("image"));
             admin.createTable(hbaseTable);
 
         }
@@ -157,7 +157,7 @@ public class ConvertSequence {
             file.read(buffer);
 
             Put p = new Put(Bytes.toBytes(status.getPath().toString()));
-            p.addColumn(Bytes.toBytes("icf"), Bytes.toBytes("img"), buffer);
+            p.addColumn(Bytes.toBytes("image"), Bytes.toBytes("img"), buffer);
             hTable.put(p);
         }
     }
