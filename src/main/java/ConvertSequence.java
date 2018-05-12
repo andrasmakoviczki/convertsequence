@@ -4,6 +4,13 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
+import org.apache.hadoop.hbase.HBaseConfiguration;
+import org.apache.hadoop.hbase.KeyValue;
+import org.apache.hadoop.hbase.client.HBaseAdmin;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.io.hfile.HFile;
+import org.apache.hadoop.hbase.util.Bytes;
 import org.apache.hadoop.io.*;
 import org.apache.hadoop.io.compress.CompressionCodec;
 import org.apache.hadoop.io.compress.GzipCodec;
@@ -12,6 +19,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+
+import static org.apache.hadoop.hbase.HColumnDescriptor.BLOCKSIZE;
+import static org.apache.hadoop.hbase.HColumnDescriptor.COMPRESSION;
 
 /**
  * Created by AMakoviczki on 2018. 04. 30..
@@ -45,13 +55,15 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        SequenceFile.Writer writer = null;
+        writeToHbase(conf,fs,inputPath,seqPath);
+
+        /*SequenceFile.Writer writer = null;
 
         try {
-            write(conf, fs, inputPath, outputPath, writer, null,null);
+            write(conf, fs, inputPath, outputPath, writer, null, null);
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
 
         /*MapFile.Writer writer = null;
         try {
@@ -85,8 +97,6 @@ public class ConvertSequence {
                 SequenceFile.Writer.valueClass(BytesWritable.class));
 
         for (FileStatus status : fileStatuses) {
-            System.out.println(status.getPath().toString());
-
             FSDataInputStream file = fs.open(status.getPath());
 
             byte buffer[] = new byte[file.available()];
@@ -106,7 +116,7 @@ public class ConvertSequence {
                 MapFile.Writer.keyClass(Text.class),
                 MapFile.Writer.valueClass(BytesWritable.class),
                 SequenceFile.Writer.valueClass(BytesWritable.class),
-                SequenceFile.Writer.compression(cType,cCodec));
+                SequenceFile.Writer.compression(cType, cCodec));
 
         for (FileStatus status : fileStatuses) {
             System.out.println(status.getPath().toString());
@@ -123,7 +133,25 @@ public class ConvertSequence {
         IOUtils.closeStream(writer);
     }
 
-    public static void read(Configuration conf, FileSystem fs, Path outputPath, SequenceFile.Reader reader) throws IOException{
+    public static void writeToHbase(Configuration conf, FileSystem fs, Path inputPath, String tableName) throws IOException {
+        FileStatus[] fileStatuses = fs.listStatus(inputPath);
+
+        Configuration hconf = HBaseConfiguration.create();
+
+        HTable hTable = new HTable(conf, "images");
+
+        for (FileStatus status : fileStatuses) {
+            FSDataInputStream file = fs.open(status.getPath());
+            byte buffer[] = new byte[file.available()];
+            file.read(buffer);
+
+            Put p = new Put(Bytes.toBytes(status.getPath().toString()));
+            p.add(Bytes.toBytes("icf"), Bytes.toBytes("img"), buffer);
+            hTable.put(p);
+        }
+    }
+
+    public static void read(Configuration conf, FileSystem fs, Path outputPath, SequenceFile.Reader reader) throws IOException {
         reader = new SequenceFile.Reader(conf,
                 SequenceFile.Reader.file(outputPath));
 
@@ -137,8 +165,8 @@ public class ConvertSequence {
         IOUtils.closeStream(reader);
     }
 
-    public static void readMap(Configuration conf, FileSystem fs, Path outputPath, MapFile.Reader reader) throws IOException{
-        reader = new MapFile.Reader(outputPath,conf);
+    public static void readMap(Configuration conf, FileSystem fs, Path outputPath, MapFile.Reader reader) throws IOException {
+        reader = new MapFile.Reader(outputPath, conf);
 
         Text key = new Text();
         BytesWritable value = new BytesWritable();
@@ -149,4 +177,5 @@ public class ConvertSequence {
 
         IOUtils.closeStream(reader);
     }
+
 }
