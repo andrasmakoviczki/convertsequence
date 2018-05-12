@@ -133,6 +133,8 @@ public class ConvertSequence {
         FileStatus[] fileStatuses = fs.listStatus(inputPath);
 
         Configuration hconf = HBaseConfiguration.create();
+        hconf.addResource(new Path("/etc/hbase/conf/hbase-site.xml"));
+        hconf.addResource(new Path("/etc/hadoop/conf/core-site.xml"));
 
         Connection connection = ConnectionFactory.createConnection(hconf);
         Admin admin = connection.getAdmin();
@@ -141,7 +143,10 @@ public class ConvertSequence {
 
         if(!admin.tableExists(tableName))
         {
-            admin.createTable(new HTableDescriptor(tableName));
+            HTableDescriptor hbaseTable = new HTableDescriptor(tableName);
+            hbaseTable.addFamily(new HColumnDescriptor("image"));
+            admin.createTable(hbaseTable);
+
         }
 
         Table hTable = connection.getTable(tableName);
