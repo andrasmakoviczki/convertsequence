@@ -144,7 +144,7 @@ public class ConvertSequence {
         if(!admin.tableExists(tableName))
         {
             HTableDescriptor hbaseTable = new HTableDescriptor(tableName);
-            hbaseTable.addFamily(new HColumnDescriptor("image"));
+            hbaseTable.addFamily(new HColumnDescriptor("icf"));
             admin.createTable(hbaseTable);
 
         }
