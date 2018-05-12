@@ -5,8 +5,10 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
 import org.apache.hadoop.hbase.HBaseConfiguration;
-import org.apache.hadoop.hbase.client.HTable;
-import org.apache.hadoop.hbase.client.Put;
+import org.apache.hadoop.hbase.HColumnDescriptor;
+import org.apache.hadoop.hbase.HTableDescriptor;
+import org.apache.hadoop.hbase.TableName;
+import org.apache.hadoop.hbase.client.*;
 import org.apache.hadoop.hbase.util.Bytes;
 
 import org.apache.hadoop.io.*;
@@ -127,12 +129,22 @@ public class ConvertSequence {
         IOUtils.closeStream(writer);
     }
 
-    public static void writeToHbase(Configuration conf, FileSystem fs, Path inputPath, String tableName) throws IOException {
+    public static void writeToHbase(Configuration conf, FileSystem fs, Path inputPath, String tname) throws IOException {
         FileStatus[] fileStatuses = fs.listStatus(inputPath);
 
         Configuration hconf = HBaseConfiguration.create();
 
-        HTable hTable = new HTable(hconf, "images");
+        Connection connection = ConnectionFactory.createConnection(hconf);
+        Admin admin = connection.getAdmin();
+
+        TableName tableName = TableName.valueOf(tname);
+
+        if(!admin.tableExists(tableName))
+        {
+            admin.createTable(new HTableDescriptor(tableName));
+        }
+
+        Table hTable = connection.getTable(tableName);
 
         for (FileStatus status : fileStatuses) {
             FSDataInputStream file = fs.open(status.getPath());
@@ -140,7 +152,7 @@ public class ConvertSequence {
             file.read(buffer);
 
             Put p = new Put(Bytes.toBytes(status.getPath().toString()));
-            p.add(Bytes.toBytes("icf"), Bytes.toBytes("img"), buffer);
+            p.addColumn(Bytes.toBytes("icf"), Bytes.toBytes("img"), buffer);
             hTable.put(p);
         }
     }
