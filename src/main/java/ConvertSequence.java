@@ -162,6 +162,8 @@ public class ConvertSequence {
             Put p = new Put(Bytes.toBytes(status.getPath().toString()));
             p.addColumn(Bytes.toBytes("image"), Bytes.toBytes("img"), buffer);
             hTable.put(p);
+
+            file.close();
         }
     }
 
