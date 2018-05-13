@@ -144,7 +144,7 @@ public class ConvertSequence {
 
         if (!admin.tableExists(tableName)) {
             HTableDescriptor hbaseTable = new HTableDescriptor(tableName);
-            HColumnDescriptor hbaseColumn = new HColumnDescriptor("image")
+            HColumnDescriptor hbaseColumn = new HColumnDescriptor("image");
             hbaseColumn.setMobEnabled(true);
             hbaseColumn.setMobThreshold(102400L);
             hbaseTable.addFamily(hbaseColumn);
