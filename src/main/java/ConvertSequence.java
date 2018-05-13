@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URI;
+
 /**
  * Created by AMakoviczki on 2018. 04. 30..
  */
@@ -51,7 +52,7 @@ public class ConvertSequence {
             System.exit(1);
         }
 
-        writeToHbase(conf,fs,inputPath,seqPath);
+        writeToHbase(conf, fs, inputPath, seqPath);
 
         /*SequenceFile.Writer writer = null;
 
@@ -141,10 +142,12 @@ public class ConvertSequence {
 
         TableName tableName = TableName.valueOf(tname);
 
-        if(!admin.tableExists(tableName))
-        {
+        if (!admin.tableExists(tableName)) {
             HTableDescriptor hbaseTable = new HTableDescriptor(tableName);
-            hbaseTable.addFamily(new HColumnDescriptor("image"));
+            HColumnDescriptor hbaseColumn = new HColumnDescriptor("image")
+            hbaseColumn.setMobEnabled(true);
+            hbaseColumn.setMobThreshold(102400L);
+            hbaseTable.addFamily(hbaseColumn);
             admin.createTable(hbaseTable);
 
         }
